@@ -1,68 +1,108 @@
-import "./styles.css";
-
 import { useState } from "react";
+
+import uuid from "react-uuid";
 import "./styles.css";
 
-function MapObjects(item) {
-  const [removetodo, setremovetodo] = useState(false);
+//Map To DO item Component
+function MapTodo({ item, id, index, settodoList, setusertodo, todolist }) {
+  const [deleteToggle, setdeleteToggle] = useState(false);
+ 
 
-  function onChnageHandlerShow() {
-    setremovetodo(!removetodo);
+  function checkToggle(id) {
+    if (id.target.checked) {
+      setdeleteToggle(true);
+    } else {
+      setdeleteToggle(false);
+    }
+  }
+
+  function deleteHandler(id) {
+    
+    const newtodo = todolist.filter((items) => items.id !== id);
+    
+    settodoList(newtodo)
+   
+ 
   }
 
   return (
-    <li>
-      {item.text}
-      <input onChange={onChnageHandlerShow} type="checkbox"></input>
-      {removetodo ? <button>delete</button> : ""}
-    </li>
+    <div>
+      <li style={{ listStyle: "none", margin: "1em" }}>
+        {item.text}
+
+        <input onClick={checkToggle} type="checkbox"></input>
+        <button
+          disabled={deleteToggle ? "" : "disabled"}
+          onClick={(e) => deleteHandler(id)}
+        >
+          {" "}
+          x{" "}
+        </button>
+      </li>
+    </div>
   );
 }
 
-function TodoList({ todoList, settodoList }) {
-  const [usetodo, setusetodo] = useState({
-    text: ""
-  });
-  function addHandler() {
-    settodoList({ ...todoList, text: usetodo });
+function TodoApp() {
+  const [todolist, settodoList] = useState([
+    {
+      id: uuid(),
+      text: "testing"
+    }
+  ]);
+
+  const [usertodo, setusertodo] = useState({ id: uuid(), text: "" });
+
+  function onChangeHandler(event) {
+    const finaluserTodo = event.target.value;
+    setusertodo({
+      id: uuid(),
+      text: finaluserTodo
+    });
   }
-  function onChnageHandler(event) {
-    const abd = event.target.value;
-    setusetodo({ text: abd });
+  // add todo function
+
+  function addToDo() {
+    settodoList([usertodo, ...todolist]);
+    setusertodo({ id: uuid(), text: "" });
+    document.getElementById("InputID").value = null;
   }
+
   return (
     <div>
       <input
-        onChange={onChnageHandler}
-        style={{ width: "50%", height: "10vh" }}
-        placeholder="add to do"
+        id="InputID"
+        style={{ width: "55%", height: "5vh", margin: "1em" }}
+        placeholder="add todo"
+        onChange={onChangeHandler}
       ></input>
       <br />
-      <button onClick={addHandler}>Add to do</button>
-      {todoList.map((item, i) => (
-        <MapObjects item={item} key={i} />
+      <button onClick={addToDo}>Add to do</button>
+      <br />
+      <span>
+        <b>Your Todo</b>
+      </span>
+      {todolist.map((item, index) => (
+        <MapTodo
+          key={item.id}
+          id={item.id}
+          todolist={todolist}
+          index={index}
+          setusertodo={setusertodo}
+          settodoList={settodoList}
+          item={item}
+        />
       ))}
     </div>
   );
 }
+
 export default function App() {
-  const [todoList, settodoList] = useState([
-    {
-      id: Math.random(),
-      text: "gf",
-      completed: false
-    },
-    {
-      text: "",
-      completed: false
-    }
-  ]);
   return (
     <div className="App">
       <h1>Hello CodeSandbox</h1>
-      <TodoList todoList={todoList} settodoList={settodoList} />
-
-      <h2>Start editing to see some magic happen!</h2>
+      Todo App
+      <TodoApp />
     </div>
   );
 }
